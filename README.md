@@ -8,5 +8,6 @@ general logging, analysis and visualization tool for NIMS Lab research.
   
  Additional, supporting components are:
   - Zookeeper (required by kafka)
+  - Schema Registry (for Avro Schemas)
  
  
