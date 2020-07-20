@@ -6,7 +6,7 @@ resource "kubernetes_deployment" "kafka" {
             app = "kafka"
         }
     }
-
+    depends_on = [kubernetes_deployment.zookeeper]
     spec{
         replicas = 1
 
@@ -56,7 +56,7 @@ resource "kubernetes_deployment" "kafka" {
 
                     env{
                         name = "KAFKA_ADVERTISED_LISTENERS"
-                        value = "PLAINTEXT://127.0.0.1:9092"
+                        value = "PLAINTEXT://kafka:9092"
                     }
 
                     env{
@@ -70,6 +70,60 @@ resource "kubernetes_deployment" "kafka" {
                 }
             }
         }    
+    }
+}
+
+# Deploy Schema Registry (for Avro)
+resource "kubernetes_deployment" "avro-registry"{
+    metadata{
+        name = "avro-registry-deployment"
+        labels = {
+            app = "avro-registry"
+        }
+    }
+    depends_on = [kubernetes_deployment.kafka]
+    spec{
+        replicas = 1
+
+        selector{
+            match_labels = {
+                app = "avro-registry"
+            }
+        }
+
+        #Schema Registry Pod
+        template{
+            metadata{
+                name = "avro-registry"
+                labels = {
+                    app = "avro-registry"
+                }
+            }
+
+            spec{
+                
+                #Schema Registry container
+                container{
+                    image = "confluentinc/cp-schema-registry:5.5.1"
+                    name = "avro-registry"
+
+                     env{
+                        name = "SCHEMA_REGISTRY_HOST_NAME"
+                        value = "avro-registry"
+                    }
+
+                    env{
+                        name = "SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL"
+                        value = "zoo1:2181"
+                    }
+
+                    env{
+                        name = "SCHEMA_REGISTRY_LISTENERS"
+                        value = "http://localhost:9081"
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -185,3 +239,27 @@ resource "kubernetes_service" "kafka_service"{
     }
 }
 
+#Schema Registry service
+resource "kubernetes_service" "avro_registry"{
+    metadata{
+        name = "avro-registry"
+        labels = {
+            app = "avro-registry"
+        }
+    }
+    spec{
+        port{
+            name = "avro-registry"
+            port = 9081
+            target_port = 9081
+            node_port = 30702
+        }
+
+        selector = {
+            app = "avro-registry"
+        }
+
+        type = "NodePort"
+        external_traffic_policy = "Local"
+    }
+}
