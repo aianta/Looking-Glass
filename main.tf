@@ -50,13 +50,23 @@ resource "kubernetes_deployment" "kafka" {
                     }
 
                     env{
-                        name = "KAFKA_LISTENERS"
-                        value = "PLAINTEXT://:9092"
+                        name = "KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP"
+                        value = "CLIENT:PLAINTEXT,PLAINTEXT:PLAINTEXT"
                     }
 
                     env{
-                        name = "KAFKA_ADVERTISED_LISTENERS"
-                        value = "PLAINTEXT://kafka:9092"
+                        name = "KAFKA_CFG_LISTENERS"
+                        value = "CLIENT://:9092,PLAINTEXT://:9093"
+                    }
+
+                    env{
+                        name = "KAFKA_CFG_ADVERTISED_LISTENERS"
+                        value = "CLIENT://localhost:9092,PLAINTEXT://kafka:9093"
+                    }
+
+                    env{
+                        name = "KAFKA_INTER_BROKER_LISTENER_NAME"
+                        value = "PLAINTEXT"
                     }
 
                     env{
@@ -66,6 +76,9 @@ resource "kubernetes_deployment" "kafka" {
 
                     port{
                         container_port = 9092
+                    }
+                    port{
+                        container_port = 9093
                     }
                 }
             }
@@ -109,7 +122,7 @@ resource "kubernetes_deployment" "avro-registry"{
 
                      env{
                         name = "SCHEMA_REGISTRY_HOST_NAME"
-                        value = "avro-registry"
+                        value = "localhost"
                     }
 
                     env{
@@ -119,7 +132,7 @@ resource "kubernetes_deployment" "avro-registry"{
 
                     env{
                         name = "SCHEMA_REGISTRY_LISTENERS"
-                        value = "http://localhost:9081"
+                        value = "http://0.0.0.0:9081"
                     }
                 }
             }
@@ -227,6 +240,12 @@ resource "kubernetes_service" "kafka_service"{
             port = 9092
             target_port = 9092
             node_port = 30701
+        }
+
+        port{
+            name = "kafka2"
+            port = 9093
+            target_port = 9093
         }
         
         selector = {
