@@ -172,6 +172,48 @@ resource "kubernetes_deployment" "elassandra"{
     }
 }
 
+# Deploy Grafana 
+resource "kubernetes_deployment" "grafana"{
+    metadata{
+        name = "grafana-deployment"
+        labels = {
+            app = "grafana"
+        }
+    }
+    spec{
+        replicas = 1
+
+        selector{
+            match_labels = {
+                app = "grafana"
+            }
+        }
+
+        #Grafana pod
+        template{
+            metadata{
+                name="grafana"
+                labels = {
+                    app = "grafana"
+                }
+            }
+
+            spec{
+
+                #Grafana container
+                container{
+                    image="grafana/grafana:7.1.0"
+                    name="grafana"
+
+                    port{
+                        container_port = 3000
+                    }
+                }
+            }
+        }
+    }
+}
+
 # Deploy Schema Registry (for Avro)
 resource "kubernetes_deployment" "avro-registry"{
     metadata{
@@ -372,12 +414,16 @@ resource "kubernetes_service" "avro_registry"{
 #Elassandra Service
 resource "kubernetes_service" "elassandra_service"{
     metadata{
-        name = "ellassandra"
+        name = "elassandra"
         labels = {
             app = "elassandra"
         }
     }
     spec{
+
+        selector = {
+            app = "elassandra"
+        }
 
         # Elastic Search Transport
         port{
@@ -443,6 +489,31 @@ resource "kubernetes_service" "elassandra_service"{
             node_port = 30710
         }
 
+        type = "NodePort"
+        external_traffic_policy = "Local"
+    }
+}
+
+#Grafana Service
+resource "kubernetes_service" "grafana_service"{
+    metadata{
+        name = "grafana"
+        labels={
+            app = "grafana"
+        }
+    }
+
+    spec{
+        port{
+            name = "grafana-http"
+            port = 3000
+            target_port = 3000
+            node_port = 30711
+        }
+
+        selector = {
+            app = "grafana"
+        }
         type = "NodePort"
         external_traffic_policy = "Local"
     }
