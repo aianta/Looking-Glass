@@ -1,3 +1,7 @@
+provider kubernetes{
+    host = "https://142.68.130.126"
+}
+
 # Deploy Kafka
 resource "kubernetes_deployment" "kafka" {
     metadata{
@@ -208,11 +212,55 @@ resource "kubernetes_deployment" "grafana"{
                     port{
                         container_port = 3000
                     }
+
+                    env{
+                        name = "GF_INSTALL_PLUGINS"
+                        value = "natel-plotly-panel"
+                    }
+
                 }
+
             }
         }
     }
 }
+
+/*Grafana volume
+resource "kubernetes_persistent_volume" "grafana_volume" {
+  metadata {
+    name = "grafana-volume"
+  }
+  spec {
+    capacity = {
+      storage = "10Gi"
+    }
+    access_modes = ["ReadWriteOnce"]
+    persistent_volume_source {
+        host_path{
+            path = "/home"
+            type = "DirectoryOrCreate"
+        }
+    }
+    storage_class_name = "standard"
+  }
+}
+
+resource "kubernetes_persistent_volume_claim" "grafana_claim" {
+  metadata {
+    name = "grafana-volume-claim"
+  }
+  spec {
+    access_modes = ["ReadWriteOnce"]
+    resources {
+      requests = {
+        storage = "10Gi"
+      }
+    }
+    volume_name = "grafana-volume"
+  }
+}
+
+*/
 
 # Deploy Schema Registry (for Avro)
 resource "kubernetes_deployment" "avro-registry"{
