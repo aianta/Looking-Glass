@@ -1,3 +1,7 @@
+variable CA {}
+variable CLIENT_CERT {}
+variable CLIENT_KEY {}
+
 provider kubernetes{
     load_config_file = "false"
 
