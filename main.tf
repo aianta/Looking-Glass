@@ -1,6 +1,7 @@
 variable CA {}
 variable CLIENT_CERT {}
 variable CLIENT_KEY {}
+variable test_var {}
 
 provider kubernetes{
     load_config_file = "false"
