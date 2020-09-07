@@ -1,14 +1,18 @@
-variable CA {}
-variable CLIENT_CERT {}
-variable CLIENT_KEY {}
 
-provider kubernetes{
-    load_config_file = "false"
 
-    host = "https://142.68.130.126"
-    client_certificate = var.CLIENT_CERT
-    client_key = var.CLIENT_KEY
-    cluster_ca_certificate = var.CA
+# provider kubernetes{
+#     # If we're running in development mode, load the config file and 
+#     # ignore the settings here. Otherwise, use the provided variables.
+#     load_config_file = var.development == true ? true: false
+
+#     host = "https://142.68.130.126"
+#     client_certificate = var.CLIENT_CERT
+#     client_key = var.CLIENT_KEY
+#     cluster_ca_certificate = var.CA
+# }
+
+output "development_mode" {
+    value = var.development
 }
 
 # Deploy Kafka
@@ -96,6 +100,164 @@ resource "kubernetes_deployment" "kafka" {
                 }
             }
         }    
+    }
+}
+
+# Deploy Kafka Connect
+resource "kubernetes_deployment" "kafka-connect"{
+    metadata{
+        name = "kafka-connect-deployment"
+        labels = {
+            app = "kafka-connect"
+        }
+    }
+    depends_on = [kubernetes_deployment.kafka, kubernetes_deployment.elassandra]
+    spec{
+        replicas = 1
+
+        selector{
+            match_labels = {
+                app = "connect"
+            }
+        }
+
+        #Kafka Connect pod
+        template{
+            metadata{
+                name="connect"
+                labels = {
+                    app = "connect"
+                }
+            }
+
+            spec{
+
+                #Kafka Connect Container
+                container{
+                    image = "confluentinc/cp-kafka-connect:5.5.1"
+                    name = "connect"
+
+                    #Kafka Connect Environment variables
+                    env{
+                        name = "CONNECT_BOOTSTRAP_SERVERS"
+                        value = "kafka:9093"
+                    }
+
+                    env{
+                        name="CONNECT_GROUP_ID"
+                        value="nims-consumers"
+                    }
+
+                    env{
+                        name="CONNECT_CONFIG_STORAGE_TOPIC"
+                        value = "nims-consumers-config"
+                    }
+
+                    env{
+                        name ="CONNECT_OFFSET_STORAGE_TOPIC"
+                        value = "nims-consumers-offsets"
+                    }
+
+                    env{
+                        name="CONNECT_STATUS_STORAGE_TOPIC"
+                        value="nims-consumers-status"
+                    }
+
+                    env{
+                        name="CONNECT_VALUE_CONVERTER"
+                        value="io.confluent.connect.avro.AvroConverter"
+                    }
+
+                    env{
+                        name="CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL"
+                        value="http://registry:9081"
+                    }
+
+                    env{
+                        name="CONNECT_KEY_CONVERTER"
+                        value="org.apache.kafka.connect.storage.StringConverter"
+                    }
+
+                    env{
+                        name="CONNECT_REST_ADVERTISED_HOST_NAME"
+                        value="localhost"
+                    }
+
+                    env{
+                        name="CONNECT_REST_PORT"
+                        value="8082"
+                    }
+
+                    env{
+                        name="CONNECT_CONNECTOR_CLASS"
+                        value="io.confluent.connect.elasticsearch.ElasticsearchSinkConnector"
+                    }
+
+                    env{
+                        name="CONNECT_TASKS_MAX"
+                        value="1"
+                    }
+
+                    env{
+                        name="CONNECT_TOPICS"
+                        value="tpg.generation.metrics"
+                    }
+
+                    env{
+                        name="CONNECT_NAME"
+                        value="nims-elasticsearch-connector"
+                    }
+
+                    env{
+                        name="CONNECT_CONNECTION_URL"
+                        value="http://elassandra:9200"
+                    }
+
+                    env{
+                        name="CONNECT_TYPE_NAME"
+                        value="_doc"
+                    }
+
+                    env{
+                        name="CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR"
+                        value="1"
+                    }
+
+                    env{
+                        name="CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR"
+                        value="1"
+                    }
+
+                    env{
+                        name="CONNECT_STATUS_STORAGE_REPLICATION_FACTOR"
+                        value="1"
+                    }
+                }
+            }
+        }
+    }
+}
+
+# Run a curl command job to create an elastic search connector
+resource "kubernetes_job" "create_connector"{
+    metadata {
+        name = "connector-job"
+    }
+    depends_on = [kubernetes_deployment.kafka-connect]
+    spec{
+        template{
+            metadata{}
+            spec{
+                container{
+                    name = "curly-box"
+                    image = "radial/busyboxplus:curl"
+                    command = ["curl", "-X", "POST", "http://connect:8082/connectors", "-H", "Content-Type: application/json",
+                    "-d", "{\"name\": \"nims-connector\",\"config\": {\"connector.class\": \"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector\",\"connection.url\": \"http://elassandra:9200\",\"tasks.max\": \"1\",\"topics\": \"tpg.generation.metrics\",\"type.name\": \"_doc\",\"auto.offset.reset\":\"earliest\",\"transforms\":\"TimestampConverter\",\"transforms.TimestampConverter.type\":\"org.apache.kafka.connect.transforms.TimestampConverter$Value\",\"transforms.TimestampConverter.format\":\"yyyy-MMM-dd HH:mm:ss\",\"transforms.TimestampConverter.target.type\":\"Date\",\"transforms.TimestampConverter.field\":\"timestamp\"}}"  ]
+                }
+                restart_policy = "OnFailure"
+            }
+        }
+        backoff_limit = 20
     }
 }
 
@@ -446,9 +608,9 @@ resource "kubernetes_service" "kafka_service"{
 #Schema Registry service
 resource "kubernetes_service" "avro_registry"{
     metadata{
-        name = "avro-registry"
+        name = "registry"
         labels = {
-            app = "avro-registry"
+            app = "registry"
         }
     }
     spec{
@@ -570,6 +732,30 @@ resource "kubernetes_service" "grafana_service"{
 
         selector = {
             app = "grafana"
+        }
+        type = "NodePort"
+        external_traffic_policy = "Local"
+    }
+}
+
+#Kafka Connect Service
+resource "kubernetes_service" "kafka_connect_service"{
+    metadata{
+        name="connect"
+        labels={
+            app = "connect"
+        }
+    }
+
+    spec{
+        port{
+            name="connect"
+            port=8082
+            target_port=8082
+        }
+
+        selector = {
+            app = "connect"
         }
         type = "NodePort"
         external_traffic_policy = "Local"
