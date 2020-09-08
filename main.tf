@@ -261,6 +261,56 @@ resource "kubernetes_job" "create_connector"{
     }
 }
 
+# Deploy Kibana
+resource "kubernetes_deployment" "kibana"{
+    metadata{
+        name = "kibana-deployment"
+        labels = {
+            app = "kibana"
+        }
+    }
+
+    spec{
+        replicas = 1
+
+        selector{
+            match_labels = {
+                app = "kibana"
+            }
+        }
+
+        #Kibana pod
+        template{
+            metadata{
+                name="kibana"
+                labels = {
+                    app = "kibana"
+                }
+            }
+
+            spec{
+
+                #Kibana container
+                container{
+                    image = "docker.elastic.co/kibana/kibana-oss:6.8.9"
+                    name="kibana"
+
+                    env{
+                        name = "ELASTICSEARCH_HOSTS"
+                        value = "http://elassandra:9200"
+                    }
+
+                    port{
+                        container_port = 5601
+                    }
+
+                }
+            }
+        }
+    }
+
+}
+
 # Deploy Elassandra 
 resource "kubernetes_deployment" "elassandra"{
     metadata{
@@ -346,92 +396,6 @@ resource "kubernetes_deployment" "elassandra"{
         }
     }
 }
-
-# Deploy Grafana 
-resource "kubernetes_deployment" "grafana"{
-    metadata{
-        name = "grafana-deployment"
-        labels = {
-            app = "grafana"
-        }
-    }
-    spec{
-        replicas = 1
-
-        selector{
-            match_labels = {
-                app = "grafana"
-            }
-        }
-
-        #Grafana pod
-        template{
-            metadata{
-                name="grafana"
-                labels = {
-                    app = "grafana"
-                }
-            }
-
-            spec{
-
-                #Grafana container
-                container{
-                    image="grafana/grafana:7.1.0"
-                    name="grafana"
-
-                    port{
-                        container_port = 3000
-                    }
-
-                    env{
-                        name = "GF_INSTALL_PLUGINS"
-                        value = "natel-plotly-panel"
-                    }
-
-                }
-
-            }
-        }
-    }
-}
-
-/*Grafana volume
-resource "kubernetes_persistent_volume" "grafana_volume" {
-  metadata {
-    name = "grafana-volume"
-  }
-  spec {
-    capacity = {
-      storage = "10Gi"
-    }
-    access_modes = ["ReadWriteOnce"]
-    persistent_volume_source {
-        host_path{
-            path = "/home"
-            type = "DirectoryOrCreate"
-        }
-    }
-    storage_class_name = "standard"
-  }
-}
-
-resource "kubernetes_persistent_volume_claim" "grafana_claim" {
-  metadata {
-    name = "grafana-volume-claim"
-  }
-  spec {
-    access_modes = ["ReadWriteOnce"]
-    resources {
-      requests = {
-        storage = "10Gi"
-      }
-    }
-    volume_name = "grafana-volume"
-  }
-}
-
-*/
 
 # Deploy Schema Registry (for Avro)
 resource "kubernetes_deployment" "avro-registry"{
@@ -713,31 +677,6 @@ resource "kubernetes_service" "elassandra_service"{
     }
 }
 
-#Grafana Service
-resource "kubernetes_service" "grafana_service"{
-    metadata{
-        name = "grafana"
-        labels={
-            app = "grafana"
-        }
-    }
-
-    spec{
-        port{
-            name = "grafana-http"
-            port = 3000
-            target_port = 3000
-            node_port = 30711
-        }
-
-        selector = {
-            app = "grafana"
-        }
-        type = "NodePort"
-        external_traffic_policy = "Local"
-    }
-}
-
 #Kafka Connect Service
 resource "kubernetes_service" "kafka_connect_service"{
     metadata{
@@ -756,6 +695,29 @@ resource "kubernetes_service" "kafka_connect_service"{
 
         selector = {
             app = "connect"
+        }
+        type = "NodePort"
+        external_traffic_policy = "Local"
+    }
+}
+
+resource "kubernetes_service" "kibana_service"{
+    metadata{
+        name="kibana"
+        labels={
+            app = "kibana"
+        }
+    }
+    spec{
+        port{
+            name="kibana"
+            port=5601
+            target_port=5601
+            node_port = 30713
+        }
+
+        selector = {
+            app = "kibana"
         }
         type = "NodePort"
         external_traffic_policy = "Local"
