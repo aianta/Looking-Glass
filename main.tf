@@ -251,8 +251,8 @@ resource "kubernetes_job" "create_connector"{
                 container{
                     name = "curly-box"
                     image = "radial/busyboxplus:curl"
-                    command = ["curl", "-X", "POST", "http://connect:8082/connectors", "-H", "Content-Type: application/json",
-                    "-d", "{\"name\": \"nims-connector\",\"config\": {\"connector.class\": \"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector\",\"connection.url\": \"http://elassandra:9200\",\"tasks.max\": \"1\",\"topics\": \"tpg.generation.metrics\",\"type.name\": \"_doc\",\"auto.offset.reset\":\"earliest\",\"transforms\":\"TimestampConverter\",\"transforms.TimestampConverter.type\":\"org.apache.kafka.connect.transforms.TimestampConverter$Value\",\"transforms.TimestampConverter.format\":\"yyyy-MMM-dd HH:mm:ss\",\"transforms.TimestampConverter.target.type\":\"Date\",\"transforms.TimestampConverter.field\":\"timestamp\"}}"  ]
+                    command = ["curl", "-X", "POST", "http://connect:8082/connectors/", "-H", "Content-Type: application/json",
+                    "-d", "{\"name\": \"nims-connector\",\"config\": {\"connector.class\": \"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector\",\"connection.url\": \"http://elassandra:9200\",\"tasks.max\": \"1\",\"topics\": \"tpg.generation.metrics\",\"type.name\": \"_doc\",\"auto.offset.reset\":\"earliest\",\"transforms\":\"InsertTimestamp\",\"transforms.InsertTimestamp.type\":\"org.apache.kafka.connect.transforms.InsertField$Value\",\"transforms.InsertTimestamp.timestamp.field\":\"@timestamp\"}}"  ]
                 }
                 restart_policy = "OnFailure"
             }
