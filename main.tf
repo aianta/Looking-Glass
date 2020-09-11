@@ -238,10 +238,57 @@ resource "kubernetes_deployment" "kafka-connect"{
     }
 }
 
-# Run a curl command job to create an elastic search connector
-resource "kubernetes_job" "create_connector"{
+# Run a curl command job to expand the maximum result window for tpg.generation.metrics
+resource "kubernetes_job" "generation_increase_max_result" {
+    metadata{
+        name = "generation-increase-max-result"
+    }
+    #Do after the connector has completed it's job
+    depends_on = [kubernetes_job.generation_connector, kubernetes_deployment.kibana, kubernetes_deployment.elassandra]
+    spec{
+        template{
+            metadata{}
+            spec{
+                container{
+                    name = "curly-box"
+                    image = "radial/busyboxplus:curl"
+                    command = ["curl", "-X", "PUT", "http://elassandra:9200/tpg.generation.metrics/_settings", "-H", "Content-Type: application/json",
+                    "-d", "{\"index\":{\"max_result_window\":1000000}}"]
+                }
+            }
+        }
+    }
+}
+
+# Run a curl command job to create an elastic search connector for tpg.generation.metrics
+resource "kubernetes_job" "generation_connector"{
     metadata {
-        name = "connector-job"
+        name = "generation-connector-job"
+    }
+    depends_on = [kubernetes_deployment.kafka-connect]
+    spec{
+        completions = 1
+        template{
+            metadata{}
+            spec{
+                container{
+                    name = "curly-box"
+                    image = "radial/busyboxplus:curl"
+                    command = ["curl", "-X", "POST", "http://connect:8082/connectors/", "-H", "Content-Type: application/json",
+                    "-d", "{\"name\": \"tpg-generation-connector\",\"config\": {\"connector.class\": \"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector\",\"connection.url\": \"http://elassandra:9200\",\"tasks.max\": \"1\",\"topics\": \"tpg.generation.metrics\",\"type.name\": \"_doc\",\"auto.offset.reset\":\"earliest\",\"transforms\":\"InsertTimestamp\",\"transforms.InsertTimestamp.type\":\"org.apache.kafka.connect.transforms.InsertField$Value\",\"transforms.InsertTimestamp.timestamp.field\":\"@timestamp\"}}"  ]
+                }
+                restart_policy = "OnFailure"
+            }
+        }
+        backoff_limit = 20
+    }
+    wait_for_completion = true
+}
+
+# Run a curl command to create an elastic search connector for tpg.run.metrics
+resource "kubernetes_job" "run_connector"{
+    metadata {
+        name = "run-connector-job"
     }
     depends_on = [kubernetes_deployment.kafka-connect]
     spec{
@@ -252,7 +299,7 @@ resource "kubernetes_job" "create_connector"{
                     name = "curly-box"
                     image = "radial/busyboxplus:curl"
                     command = ["curl", "-X", "POST", "http://connect:8082/connectors/", "-H", "Content-Type: application/json",
-                    "-d", "{\"name\": \"nims-connector\",\"config\": {\"connector.class\": \"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector\",\"connection.url\": \"http://elassandra:9200\",\"tasks.max\": \"1\",\"topics\": \"tpg.generation.metrics\",\"type.name\": \"_doc\",\"auto.offset.reset\":\"earliest\",\"transforms\":\"InsertTimestamp\",\"transforms.InsertTimestamp.type\":\"org.apache.kafka.connect.transforms.InsertField$Value\",\"transforms.InsertTimestamp.timestamp.field\":\"@timestamp\"}}"  ]
+                    "-d", "{\"name\": \"tpg-run-connector\",\"config\": {\"connector.class\": \"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector\",\"connection.url\": \"http://elassandra:9200\",\"tasks.max\": \"1\",\"topics\": \"tpg.run.metrics\",\"type.name\": \"_doc\",\"auto.offset.reset\":\"earliest\",\"transforms\":\"InsertTimestamp\",\"transforms.InsertTimestamp.type\":\"org.apache.kafka.connect.transforms.InsertField$Value\",\"transforms.InsertTimestamp.timestamp.field\":\"@timestamp\"}}"  ]
                 }
                 restart_policy = "OnFailure"
             }
@@ -298,6 +345,11 @@ resource "kubernetes_deployment" "kibana"{
                     env{
                         name = "ELASTICSEARCH_HOSTS"
                         value = "http://elassandra:9200"
+                    }
+
+                    env{
+                        name = "SERVER_HOST"
+                        value = "0.0.0.0"
                     }
 
                     port{
