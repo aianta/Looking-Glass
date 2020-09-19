@@ -290,7 +290,7 @@ resource "kubernetes_job" "run_connector"{
     metadata {
         name = "run-connector-job"
     }
-    depends_on = [kubernetes_deployment.kafka-connect]
+    depends_on = [kubernetes_deployment.kafka-connect, kubernetes_job.generation_connector]
     spec{
         template{
             metadata{}
@@ -306,6 +306,31 @@ resource "kubernetes_job" "run_connector"{
         }
         backoff_limit = 20
     }
+    wait_for_completion = true
+}
+
+# Run a curl command to create an elastic search connector for tpg.team.metrics
+resource "kubernetes_job" "team_connector"{
+    metadata {
+        name = "team-connector-job"
+    }
+    depends_on = [kubernetes_deployment.kafka-connect, kubernetes_job.run_connector]
+    spec{
+        template{
+            metadata{}
+            spec{
+                container{
+                    name = "curly-box"
+                    image = "radial/busyboxplus:curl"
+                    command = ["curl", "-X", "POST", "http://connect:8082/connectors/", "-H", "Content-Type: application/json",
+                    "-d", "{\"name\": \"tpg-team-connector\",\"config\": {\"connector.class\": \"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector\",\"connection.url\": \"http://elassandra:9200\",\"tasks.max\": \"1\",\"topics\": \"tpg.team.metrics\",\"type.name\": \"_doc\",\"auto.offset.reset\":\"earliest\",\"transforms\":\"InsertTimestamp\",\"transforms.InsertTimestamp.type\":\"org.apache.kafka.connect.transforms.InsertField$Value\",\"transforms.InsertTimestamp.timestamp.field\":\"@timestamp\"}}"  ]
+                }
+                restart_policy = "OnFailure"
+            }
+        }
+        backoff_limit = 20
+    }
+    wait_for_completion = true
 }
 
 # Deploy Kibana
