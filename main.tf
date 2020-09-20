@@ -232,6 +232,7 @@ resource "kubernetes_deployment" "kafka-connect"{
                         name="CONNECT_STATUS_STORAGE_REPLICATION_FACTOR"
                         value="1"
                     }
+
                 }
             }
         }
@@ -381,6 +382,17 @@ resource "kubernetes_deployment" "kibana"{
                         container_port = 5601
                     }
 
+                    volume_mount{
+                        name = "kibana-storage"
+                        mount_path = "/data"
+                    }
+
+                }
+                volume{
+                    name = "kibana-storage"
+                    persistent_volume_claim{
+                        claim_name = "kibana-volume-claim"
+                    }
                 }
             }
         }
@@ -467,7 +479,17 @@ resource "kubernetes_deployment" "elassandra"{
                         initial_delay_seconds = 15
                         timeout_seconds = 5
                     }
-                        
+
+                    volume_mount{
+                        name = "elassandra-storage"
+                        mount_path = "/var/lib/cassandra"
+                    }
+                }
+                volume{
+                    name = "elassandra-storage"
+                    persistent_volume_claim{
+                        claim_name = "elassandra-volume-claim"
+                    }
                 }
             }
         }
@@ -798,5 +820,93 @@ resource "kubernetes_service" "kibana_service"{
         }
         type = "NodePort"
         external_traffic_policy = "Local"
+    }
+}
+
+resource "kubernetes_persistent_volume" "elassandra_volume"{
+    metadata{
+        name = "elassandra-pv"
+    }
+    spec{
+        capacity = {
+            storage = var.elassandra_volume_size
+        }
+        access_modes = ["ReadWriteMany"]
+        storage_class_name = "standard"
+        node_affinity{
+            required{
+                node_selector_term {
+                    match_expressions {
+                        key = "kubernetes.io/hostname"
+                        operator = "In"
+                        values = [var.elassandra_data_node]
+                    }
+                }
+            }
+        }
+        persistent_volume_source{
+            local{
+                path = var.elassandra_data_path
+            }
+        }
+    }
+}
+
+resource "kubernetes_persistent_volume" "kibana_volume"{
+    metadata{
+        name = "kibana-pv"
+    }
+    spec{
+        capacity = {
+            storage = var.kibana_volume_size
+        }
+        access_modes = ["ReadWriteMany"]
+        storage_class_name = "standard"
+        node_affinity{
+            required{
+                node_selector_term {
+                    match_expressions {
+                        key = "kubernetes.io/hostname"
+                        operator = "In"
+                        values = [var.kibana_data_node]
+                    }
+                }
+            }
+        }
+        persistent_volume_source{
+            local{
+                path = var.kibana_data_path
+            }
+        }
+    }
+}
+
+resource "kubernetes_persistent_volume_claim" "elassandra_pvc"{
+    metadata {
+        name = "elassandra-volume-claim"
+    }
+    spec{
+        access_modes = ["ReadWriteMany"]
+        resources {
+            requests = {
+                storage = var.elassandra_volume_size
+            }
+        }
+        volume_name = kubernetes_persistent_volume.elassandra_volume.metadata.0.name
+    }
+}
+
+resource "kubernetes_persistent_volume_claim" "kibana_pvc"{
+    metadata {
+        name = "kibana-volume-claim"
+    }
+    spec{
+        access_modes = ["ReadWriteMany"]
+        resources {
+            requests = {
+                storage = var.kibana_volume_size
+            }
+        }
+        volume_name = kubernetes_persistent_volume.kibana_volume.metadata.0.name
     }
 }
