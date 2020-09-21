@@ -12,7 +12,7 @@
 # }
 
 output "development_mode" {
-    value = var.development
+    #value = var.development
 }
 
 # Deploy Kafka
@@ -887,6 +887,7 @@ resource "kubernetes_persistent_volume_claim" "elassandra_pvc"{
     }
     spec{
         access_modes = ["ReadWriteMany"]
+        storage_class_name = "standard"
         resources {
             requests = {
                 storage = var.elassandra_volume_size
@@ -902,6 +903,7 @@ resource "kubernetes_persistent_volume_claim" "kibana_pvc"{
     }
     spec{
         access_modes = ["ReadWriteMany"]
+        storage_class_name = "standard"
         resources {
             requests = {
                 storage = var.kibana_volume_size
