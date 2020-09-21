@@ -11,9 +11,6 @@
 #     cluster_ca_certificate = var.CA
 # }
 
-output "development_mode" {
-    #value = var.development
-}
 
 # Deploy Kafka
 resource "kubernetes_deployment" "kafka" {
