@@ -20,6 +20,7 @@ module "sample-generations-connector" {
     topic = "tpg.sample.generation.metrics"
     topic_name = "sample-generations"
     
+    depends_on = [kubernetes_deployment.kafka-connect]
 }
 
 # Deploy Kafka
