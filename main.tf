@@ -11,6 +11,16 @@
 #     cluster_ca_certificate = var.CA
 # }
 
+# Create a connector for sample generation metrics
+module "sample-generations-connector" {
+    source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
+
+    #Variables
+    name = "sample"
+    topic = "tpg.sample.generation.metrics"
+    topic_name = "sample-generations"
+    
+}
 
 # Deploy Kafka
 resource "kubernetes_deployment" "kafka" {
