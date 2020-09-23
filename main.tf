@@ -276,7 +276,7 @@ resource "kubernetes_deployment" "kibana"{
 
                 #Kibana container
                 container{
-                    image = "docker.elastic.co/kibana/kibana-oss:6.8.9"
+                    image = "docker.elastic.co/kibana/kibana-oss:6.8.4"
                     name="kibana"
 
                     env{
