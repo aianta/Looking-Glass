@@ -655,7 +655,7 @@ resource "kubernetes_service" "kafka_service"{
             name = "kafka"
             port = 9092
             target_port = 9092
-            node_port = 9092
+            node_port = 30701
         }
 
         port{
