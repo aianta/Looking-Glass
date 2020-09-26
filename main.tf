@@ -32,11 +32,11 @@ module "interlude-data-connector" {
 }
 
 # Create connectors for stepping_stone
-module "stepping_stone-data-connector" {
+module "stepping-stone-data-connector" {
     source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
 
     #Variables
-    name = "stepping_stone"
+    name = "stepping-stone"
     
     depends_on = [kubernetes_deployment.kafka-connect]
 }
