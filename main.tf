@@ -12,11 +12,41 @@
 # }
 
 # Create connectors for samples
-module "sample-generations-connector" {
+module "sample-data-connector" {
     source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
 
     #Variables
     name = "sample"
+    
+    depends_on = [kubernetes_deployment.kafka-connect]
+}
+
+# Create connectors for interlude
+module "interlude-data-connector" {
+    source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
+
+    #Variables
+    name = "interlude"
+    
+    depends_on = [kubernetes_deployment.kafka-connect]
+}
+
+# Create connectors for stepping_stone
+module "stepping_stone-data-connector" {
+    source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
+
+    #Variables
+    name = "stepping_stone"
+    
+    depends_on = [kubernetes_deployment.kafka-connect]
+}
+
+# Create connectors for vanguard
+module "vanguard-data-connector" {
+    source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
+
+    #Variables
+    name = "vanguard"
     
     depends_on = [kubernetes_deployment.kafka-connect]
 }
