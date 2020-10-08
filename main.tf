@@ -481,6 +481,12 @@ resource "kubernetes_deployment" "avro-registry"{
                         value = "zoo1:2181"
                     }
 
+                    # Allow schema changes... this may be a mistake.
+                    env{
+                        name = "SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL"
+                        value = "none"
+                    }
+
                     env{
                         name = "SCHEMA_REGISTRY_LISTENERS"
                         value = "http://0.0.0.0:9081"
