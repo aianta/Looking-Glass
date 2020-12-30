@@ -11,15 +11,15 @@
 #     cluster_ca_certificate = var.CA
 # }
 
-# Create connectors for samples
-module "sample-data-connector" {
-    source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
+# # Create connectors for samples
+# module "sample-data-connector" {
+#     source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
 
-    #Variables
-    name = "sample"
+#     #Variables
+#     name = "sample"
     
-    depends_on = [kubernetes_deployment.kafka-connect]
-}
+#     depends_on = [kubernetes_deployment.kafka-connect]
+# }
 
 # # Create connectors for interlude
 # module "interlude-data-connector" {
