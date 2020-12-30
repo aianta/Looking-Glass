@@ -21,35 +21,35 @@ module "sample-data-connector" {
     depends_on = [kubernetes_deployment.kafka-connect]
 }
 
-# Create connectors for interlude
-module "interlude-data-connector" {
-    source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
+# # Create connectors for interlude
+# module "interlude-data-connector" {
+#     source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
 
-    #Variables
-    name = "interlude"
+#     #Variables
+#     name = "interlude"
     
-    depends_on = [kubernetes_deployment.kafka-connect]
-}
+#     depends_on = [kubernetes_deployment.kafka-connect]
+# }
 
-# Create connectors for stepping_stone
-module "stepping-stone-data-connector" {
-    source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
+# # Create connectors for stepping_stone
+# module "stepping-stone-data-connector" {
+#     source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
 
-    #Variables
-    name = "stepping-stone"
+#     #Variables
+#     name = "stepping-stone"
     
-    depends_on = [kubernetes_deployment.kafka-connect]
-}
+#     depends_on = [kubernetes_deployment.kafka-connect]
+# }
 
-# Create connectors for vanguard
-module "vanguard-data-connector" {
-    source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
+# # Create connectors for vanguard
+# module "vanguard-data-connector" {
+#     source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
 
-    #Variables
-    name = "vanguard"
+#     #Variables
+#     name = "vanguard"
     
-    depends_on = [kubernetes_deployment.kafka-connect]
-}
+#     depends_on = [kubernetes_deployment.kafka-connect]
+# }
 
 # Deploy Kafka
 resource "kubernetes_deployment" "kafka" {
