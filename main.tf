@@ -764,6 +764,9 @@ resource "kubernetes_service" "kibana_service"{
 resource "kubernetes_ingress" "kibana_ingress"{
     metadata {
       name = "kibana-ingress"
+      annotations = {
+        "kubernetes.io/ingress.class" = "nginx"
+      }
     }
 
     spec {
