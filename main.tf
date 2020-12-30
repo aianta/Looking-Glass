@@ -568,8 +568,8 @@ resource "kubernetes_service" "zookeeper-service"{
         selector = {
                 app = "zookeeper"
         }
-        type = "NodePort"
-        external_traffic_policy = "Local"
+        type = "ClusterIP"
+        external_traffic_policy = "Cluster"
     }
 }
 
@@ -599,8 +599,8 @@ resource "kubernetes_service" "kafka_service"{
             app = "kafka"
         }
         
-        type = "NodePort"
-        external_traffic_policy = "Local"
+        type = "ClusterIP"
+        external_traffic_policy = "Cluster"
 
     }
 }
@@ -625,8 +625,8 @@ resource "kubernetes_service" "avro_registry"{
             app = "avro-registry"
         }
 
-        type = "NodePort"
-        external_traffic_policy = "Local"
+        type = "ClusterIP"
+        external_traffic_policy = "Cluster"
     }
 }
 
@@ -708,8 +708,8 @@ resource "kubernetes_service" "elassandra_service"{
             node_port = 30710
         }
 
-        type = "NodePort"
-        external_traffic_policy = "Local"
+        type = "ClusterIP"
+        external_traffic_policy = "Cluster"
     }
 }
 
@@ -732,8 +732,8 @@ resource "kubernetes_service" "kafka_connect_service"{
         selector = {
             app = "connect"
         }
-        type = "NodePort"
-        external_traffic_policy = "Local"
+        type = "ClusterIP"
+        external_traffic_policy = "Cluster"
     }
 }
 
@@ -755,8 +755,8 @@ resource "kubernetes_service" "kibana_service"{
         selector = {
             app = "kibana"
         }
-        type = "NodePort"
-        external_traffic_policy = "Local"
+        type = "ClusterIP"
+        external_traffic_policy = "Cluster"
     }
 }
 
