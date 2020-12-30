@@ -80,7 +80,7 @@ resource "kubernetes_deployment" "kafka" {
             }
 
             spec{
-
+                dns_policy = "ClusterFirstWithHostNet"
                 # Kafka container
                 container{
                     image = "bitnami/kafka:2.5.0"
@@ -167,7 +167,7 @@ resource "kubernetes_deployment" "kafka-connect"{
             }
 
             spec{
-
+                dns_policy = "ClusterFirstWithHostNet"
                 #Kafka Connect Container
                 container{
                     image = "confluentinc/cp-kafka-connect:5.5.1"
@@ -303,7 +303,7 @@ resource "kubernetes_deployment" "kibana"{
             }
 
             spec{
-
+                dns_policy = "ClusterFirstWithHostNet"
                 #Kibana container
                 container{
                     image = "docker.elastic.co/kibana/kibana-oss:6.8.9"
@@ -358,7 +358,7 @@ resource "kubernetes_deployment" "elassandra"{
             }
 
             spec{
-
+                dns_policy = "ClusterFirstWithHostNet"
                 #Elassandra container
                 container{
                     image = "strapdata/elassandra:6.8.4"
@@ -455,7 +455,7 @@ resource "kubernetes_deployment" "avro-registry"{
             }
 
             spec{
-                
+                dns_policy = "ClusterFirstWithHostNet"
                 #Schema Registry container
                 container{
                     image = "confluentinc/cp-schema-registry:5.5.1"
