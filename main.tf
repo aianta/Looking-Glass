@@ -770,10 +770,19 @@ resource "kubernetes_ingress" "kibana_ingress"{
     }
 
     spec {
-      backend{
-          service_name = kubernetes_service.kibana_service.metadata.0.name
-          service_port = 5601
+      rule {
+        host = "129.173.67.230"
+        http{
+            path{
+                path = "/"
+                backend{
+                    service_name = kubernetes_service.kibana_service.metadata.0.name
+                    service_port = 5601
+                }
+            }
+        }
       }
+
     }
 }
 
