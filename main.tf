@@ -323,17 +323,7 @@ resource "kubernetes_deployment" "kibana"{
                         container_port = 5601
                     }
 
-                    volume_mount{
-                        name = "kibana-storage"
-                        mount_path = "/data"
-                    }
 
-                }
-                volume{
-                    name = "kibana-storage"
-                    persistent_volume_claim{
-                        claim_name = "kibana-volume-claim"
-                    }
                 }
             }
         }
@@ -770,6 +760,20 @@ resource "kubernetes_service" "kibana_service"{
     }
 }
 
+# Kibana Ingress 
+resource "kubernetes_ingress" "kibana_ingress"{
+    metadata {
+      name = "kibana-ingress"
+    }
+
+    spec {
+      backend{
+          service_name = kubernetes_service.kibana_service.metadata.0.name
+          service_port = 5601
+      }
+    }
+}
+
 resource "kubernetes_persistent_volume" "elassandra_volume"{
     metadata{
         name = "elassandra-pv"
@@ -799,34 +803,7 @@ resource "kubernetes_persistent_volume" "elassandra_volume"{
     }
 }
 
-resource "kubernetes_persistent_volume" "kibana_volume"{
-    metadata{
-        name = "kibana-pv"
-    }
-    spec{
-        capacity = {
-            storage = var.kibana_volume_size
-        }
-        access_modes = ["ReadWriteMany"]
-        storage_class_name = "standard"
-        node_affinity{
-            required{
-                node_selector_term {
-                    match_expressions {
-                        key = "kubernetes.io/hostname"
-                        operator = "In"
-                        values = [var.kibana_data_node]
-                    }
-                }
-            }
-        }
-        persistent_volume_source{
-            local{
-                path = var.kibana_data_path
-            }
-        }
-    }
-}
+
 
 resource "kubernetes_persistent_volume_claim" "elassandra_pvc"{
     metadata {
@@ -844,18 +821,3 @@ resource "kubernetes_persistent_volume_claim" "elassandra_pvc"{
     }
 }
 
-resource "kubernetes_persistent_volume_claim" "kibana_pvc"{
-    metadata {
-        name = "kibana-volume-claim"
-    }
-    spec{
-        access_modes = ["ReadWriteMany"]
-        storage_class_name = "standard"
-        resources {
-            requests = {
-                storage = var.kibana_volume_size
-            }
-        }
-        volume_name = kubernetes_persistent_volume.kibana_volume.metadata.0.name
-    }
-}
