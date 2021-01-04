@@ -771,7 +771,7 @@ resource "kubernetes_ingress" "kibana_ingress"{
 
     spec {
       rule {
-          host = "localhost"
+          host = "os-vm230.research.cs.dal.ca"
         http{
             path{
                 path = "/"
