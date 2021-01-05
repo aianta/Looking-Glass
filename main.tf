@@ -749,8 +749,7 @@ resource "kubernetes_service" "kibana_service"{
             name="kibana"
             port=5601
         }
-
-        type="LoadBalancer"
+        
 
         selector = {
             app = "kibana"
