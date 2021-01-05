@@ -316,7 +316,7 @@ resource "kubernetes_deployment" "kibana"{
 
                     env{
                         name = "SERVER_HOST"
-                        value = "0.0.0.0"
+                        value = "os-vm230.research.cs.dal.ca"
                     }
 
                     port{
