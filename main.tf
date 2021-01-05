@@ -748,15 +748,12 @@ resource "kubernetes_service" "kibana_service"{
         port{
             name="kibana"
             port=5601
-            target_port=5601
-            node_port = 30713
         }
 
         selector = {
             app = "kibana"
         }
-        type = "NodePort"
-        external_traffic_policy = "Local"
+        type = "ClusterIP"
     }
 }
 
