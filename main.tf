@@ -753,7 +753,7 @@ resource "kubernetes_service" "kibana_service"{
         selector = {
             app = "kibana"
         }
-        type = "ClusterIP"
+        
     }
 }
 
