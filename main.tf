@@ -561,15 +561,12 @@ resource "kubernetes_service" "zookeeper-service"{
         port{
             name = "client"
             port = 2181
-            target_port = 2181
-            node_port = 30700
         }
 
         selector = {
                 app = "zookeeper"
         }
-        type = "NodePort"
-        external_traffic_policy = "Local"
+
     }
 }
 
@@ -585,22 +582,19 @@ resource "kubernetes_service" "kafka_service"{
         port{
             name = "kafka"
             port = 9092
-            target_port = 9092
-            node_port = 30701
+
         }
 
         port{
             name = "kafka2"
             port = 9093
-            target_port = 9093
+
         }
         
         selector = {
             app = "kafka"
         }
         
-        type = "NodePort"
-        external_traffic_policy = "Local"
 
     }
 }
@@ -617,16 +611,12 @@ resource "kubernetes_service" "avro_registry"{
         port{
             name = "avro-registry"
             port = 9081
-            target_port = 9081
-            node_port = 30702
         }
 
         selector = {
             app = "avro-registry"
         }
 
-        type = "NodePort"
-        external_traffic_policy = "Local"
     }
 }
 
@@ -648,68 +638,51 @@ resource "kubernetes_service" "elassandra_service"{
         port{
             name = "elastic-transport"
             port = 9300
-            target_port = 9300
-            node_port = 30703
         }
 
         # Elastic Search HTTP
         port{
             name = "elastic-http"
             port = 9200
-            target_port = 9200
-            node_port = 30704
         }
 
         # Thrift Service
         port{
             name = "thrift-service"
             port = 9160
-            target_port = 9160
-            node_port = 30705
         }
 
         # Encrypted CQL
         port{
             name = "encrypted-cql"
             port = 9142
-            target_port = 9142
-            node_port = 30706
         }
 
         # CQL
         port{
             name = "cql"
             port = 9042
-            target_port = 9042
-            node_port = 30707
         }
 
         # JMX
         port{
             name = "jmx"
             port = 7199
-            target_port = 7199
-            node_port = 30708
         }
 
         # TLS intra-node communication
         port{
             name = "intra-tls"
             port = 7001
-            target_port = 7001
-            node_port = 30709
         }
 
         # Intra-node communication
         port{
             name = "intra"
             port = 7000
-            target_port = 7000
-            node_port = 30710
+
         }
 
-        type = "NodePort"
-        external_traffic_policy = "Local"
     }
 }
 
@@ -726,14 +699,11 @@ resource "kubernetes_service" "kafka_connect_service"{
         port{
             name="connect"
             port=8082
-            target_port=8082
         }
 
         selector = {
             app = "connect"
         }
-        type = "NodePort"
-        external_traffic_policy = "Local"
     }
 }
 
