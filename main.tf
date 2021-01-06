@@ -579,12 +579,16 @@ resource "kubernetes_service" "kafka_service"{
         }
     }
     spec{
+        # Port 9092 is meant for clients, if you're looking to send messages
+        # to kafka this is where you do it.
         port{
             name = "kafka"
             port = 9092
 
         }
 
+        # Port 9093 is meant for other kafka brokers working together, this is like
+        # the internal broker port.
         port{
             name = "kafka2"
             port = 9093
@@ -728,10 +732,10 @@ resource "kubernetes_service" "kibana_service"{
     }
 }
 
-# Kibana Ingress 
-resource "kubernetes_ingress" "kibana_ingress"{
+# Ingress Configuration
+resource "kubernetes_ingress" "looking_glass_ingress"{
     metadata {
-      name = "kibana-ingress"
+      name = "looking-glass-ingress"
       annotations = {
         "kubernetes.io/ingress.class" = "nginx"
       }
@@ -741,6 +745,8 @@ resource "kubernetes_ingress" "kibana_ingress"{
       rule {
           host = "os-vm230.research.cs.dal.ca"
         http{
+            
+            # Kibana
             path{
                 path = "/nims/kibana"
                 backend{
@@ -748,6 +754,19 @@ resource "kubernetes_ingress" "kibana_ingress"{
                     service_port = 5601
                 }
             }
+
+            # Kafka for external clients
+            path{
+                path = "/nims/kafka"
+                backend {
+                  service_name = kubernetes_service.kafka_service.metadata.0.name
+                  service_port = 9092
+                }
+            }
+
+            # TODO - Add path for elastic search once we need it available externally
+            
+
         }
       }
 
