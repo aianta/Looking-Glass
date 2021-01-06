@@ -748,8 +748,8 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
             
             # Kibana
             path{
-                path = "/nims/kibana"
-                type = "Prefix"
+                path = "/nims/kibana/*"
+
                 backend{
                     service_name = kubernetes_service.kibana_service.metadata.0.name
                     service_port = 5601
@@ -758,8 +758,8 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
 
             # Kafka for external clients
             path{
-                path = "/nims/kafka"
-                type = "Prefix"
+                path = "/nims/kafka/*"
+
                 backend {
                     service_name = kubernetes_service.kafka_service.metadata.0.name
                     service_port = 9092
