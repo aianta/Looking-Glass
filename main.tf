@@ -319,6 +319,11 @@ resource "kubernetes_deployment" "kibana"{
                         value = "0.0.0.0"
                     }
 
+                    env{
+                        name="SERVER_BASEPATH"
+                        value = "/nims/kibana/"
+                    }
+
                     port{
                         container_port = 5601
                     }
