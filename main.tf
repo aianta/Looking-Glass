@@ -745,6 +745,7 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
       annotations = {
         "kubernetes.io/ingress.class" = "nginx"
         "nginx.org/rewrites" = "serviceName=${kubernetes_service.kibana_service.metadata.0.name} rewrite=/;serviceName=${kubernetes_service.kafka_service.metadata.0.name} rewrite=/"
+        "nginx.org/mergeable-ingress-type" = "minion"
         # This doesn't work for some reason :( no auth for us I guess
         # "nginx.ingress.kubernetes.io/auth-type" = "basic"
         # "nginx.ingress.kubernetes.io/auth-secret" = "basic-auth"
