@@ -749,7 +749,7 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
             
             # Kibana
             path{
-                path = "/nims/kibana/*"
+                path = "/nims/kibana"
 
                 backend{
                     service_name = kubernetes_service.kibana_service.metadata.0.name
@@ -759,7 +759,7 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
 
             # Kafka for external clients
             path{
-                path = "/nims/kafka/*"
+                path = "/nims/kafka"
 
                 backend {
                     service_name = kubernetes_service.kafka_service.metadata.0.name
