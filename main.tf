@@ -738,6 +738,7 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
       name = "looking-glass-ingress"
       annotations = {
         "kubernetes.io/ingress.class" = "nginx"
+        "nginx.ingress.kubernetes.io/rewrite-target" = "/"
       }
     }
 
