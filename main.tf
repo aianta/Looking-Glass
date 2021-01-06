@@ -749,6 +749,7 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
             # Kibana
             path{
                 path = "/nims/kibana"
+                path_type = "Prefix"
                 backend{
                     service_name = kubernetes_service.kibana_service.metadata.0.name
                     service_port = 5601
@@ -758,15 +759,16 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
             # Kafka for external clients
             path{
                 path = "/nims/kafka"
+                path_type = "Prefix"
                 backend {
-                  service_name = kubernetes_service.kafka_service.metadata.0.name
-                  service_port = 9092
+                    service_name = kubernetes_service.kafka_service.metadata.0.name
+                    service_port = 9092
                 }
             }
 
             # TODO - Add path for elastic search once we need it available externally
-            
 
+            # TODO - Add path for Kafka Connect once we have API support for it in the integrationn libraries
         }
       }
 
