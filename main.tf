@@ -772,7 +772,7 @@ resource "kubernetes_ingress" "kibana_ingress"{
           host = "os-vm230.research.cs.dal.ca"
         http{
             path{
-                path = "/"
+                path = "/nims/kibana"
                 backend{
                     service_name = kubernetes_service.kibana_service.metadata.0.name
                     service_port = 5601
