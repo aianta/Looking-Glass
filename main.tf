@@ -746,6 +746,7 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
         "nginx.org/rewrites" = "serviceName=${kubernetes_service.kibana_service.metadata.0.name} rewrite=/;serviceName=${kubernetes_service.kafka_service.metadata.0.name} rewrite=/"
         "nginx.ingress.kubernetes.io/auth-type" = "basic"
         "nginx.ingress.kubernetes.io/auth-secret" = "basic-auth"
+        "nginx.ingress.kubernetes.io/auth-realm" = "Authentication Required"
       }
     }
 
