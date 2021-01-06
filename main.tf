@@ -321,7 +321,7 @@ resource "kubernetes_deployment" "kibana"{
 
                     env{
                         name="SERVER_BASEPATH"
-                        value = "/nims/kibana/"
+                        value = "/nims/kibana"
                     }
 
                     port{
