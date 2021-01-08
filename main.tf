@@ -631,7 +631,7 @@ resource "kubernetes_service" "avro_registry"{
 }
 
 #Elassandra Service
-resource "kubernetes_service" "elassandra_service"{
+resource "kubernetes_service" "elassandra_service" {
     metadata{
         name = "elassandra"
         labels = {
@@ -778,9 +778,35 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
                 }
             }
 
-            # TODO - Add path for elastic search once we need it available externally
+            # Add path for elastic search once we need it available externally
+            path{
+                path = "/nims/es/"
 
-            # TODO - Add path for Kafka Connect once we have API support for it in the integrationn libraries
+                backend {
+                  service_name = kubernetes_service.elassandra_service.metadata.0.name
+                  service_port = 9200
+                }
+            }
+
+            #Add path for Avro Registry
+            path{
+                path = "/nims/avro-registry/"
+
+                backend {
+                  service_name = kubernetes_service.avro_registry.metadata.0.name
+                  service_port = 9081
+                }
+            }
+
+            # Add path for Kafka Connect once we have API support for it in the integrationn libraries
+            path{
+                path = "/nims/kafka-connect/"
+
+                backend {
+                  service_name = kubernetes_service.kafka_connect_service.metadata.0.name
+                  service_port = 8082
+                }
+            }
         }
       }
 
