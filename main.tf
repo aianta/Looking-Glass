@@ -415,6 +415,13 @@ resource "kubernetes_stateful_set" "elassandra"{
                     image = "strapdata/elassandra:6.8.4"
                     name = "elassandra"
 
+                    security_context {
+                      privileged = false
+                      capabilities {
+                        add = [ "IPC_LOCK", "SYS_RESOURCE" ]
+                      }
+                    }
+
                     #Elassandra Environment variables
                     #http://doc.elassandra.io/en/latest/installation.html#environment-variables
                     env{
