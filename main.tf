@@ -339,6 +339,7 @@ resource "kubernetes_deployment" "kibana"{
 
 # Deploy Elassandra 
 resource "kubernetes_deployment" "elassandra"{
+    depends_on = [ kubernetes_service.elassandra_service ]
     metadata{
         name = "elassandra-deployment"
         labels = {
@@ -402,6 +403,11 @@ resource "kubernetes_deployment" "elassandra"{
                     env{
                         name="CASSANDRA_CLUSTER_NAME"
                         value = "Elassandra-Looking-Glass"
+                    }
+
+                    env {
+                      name="CASSANDRA_SERVICE"
+                      value="elassandra"
                     }
 
                     env{
