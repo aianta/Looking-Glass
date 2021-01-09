@@ -420,7 +420,7 @@ resource "kubernetes_deployment" "elassandra"{
                         name="CASSANDRA_RACK"
                         value_from {
                           field_ref {
-                            field_path = "spec.nodename"
+                            field_path = "spec.nodeName"
                           }
                         }
                     }
