@@ -338,6 +338,7 @@ resource "kubernetes_deployment" "kibana"{
 }
 
 # Deploy Elassandra 
+# Used this for reference https://github.com/strapdata/kubernetes-elassandra/blob/master/elassandra-statefulset.yaml
 resource "kubernetes_stateful_set" "elassandra"{
     depends_on = [ kubernetes_service.elassandra_service ]
     metadata{
@@ -349,6 +350,11 @@ resource "kubernetes_stateful_set" "elassandra"{
     spec{
         replicas = 3
         service_name = kubernetes_service.elassandra_service.metadata.0.name
+        
+        update_strategy {
+          type = "RollingUpdate"
+        }
+
 
         selector{
             match_labels = {
@@ -366,6 +372,25 @@ resource "kubernetes_stateful_set" "elassandra"{
             }
 
             spec{
+
+                init_container {
+                  name = "increase-vm-max-map-count"
+                  image = "busybox"
+                  image_pull_policy = "IfNotPresent"
+                  command = [ "sysctl", "-w", "vm.max_map_count=1048575" ]
+                  security_context {
+                    privileged = true
+                  }
+                }
+
+                init_container {
+                  name = "increase ulimit"
+                  image = "busybox"
+                  command = [ "sh", "-c", "ulimit -l unlimited" ]
+                  security_context {
+                    privileged = true
+                  }
+                }
 
                 # Ensure no two pod instances are deployed on the same node
                 affinity {
