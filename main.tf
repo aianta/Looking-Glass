@@ -338,16 +338,17 @@ resource "kubernetes_deployment" "kibana"{
 }
 
 # Deploy Elassandra 
-resource "kubernetes_deployment" "elassandra"{
+resource "kubernetes_stateful_set" "elassandra"{
     depends_on = [ kubernetes_service.elassandra_service ]
     metadata{
-        name = "elassandra-deployment"
+        name = "elassandra-stateful-set"
         labels = {
             app = "elassandra"
         }
     }
     spec{
         replicas = 3
+        service_name = kubernetes_service.elassandra_service.metadata.0.name
 
         selector{
             match_labels = {
