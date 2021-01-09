@@ -576,14 +576,8 @@ resource "kubernetes_stateful_set" "elassandra"{
                     }
 
                     volume_mount{
-                        name = "elassandra-storage"
+                        name = "elassandra-volume-claim"
                         mount_path = "/var/lib/cassandra"
-                    }
-                }
-                volume{
-                    name = "elassandra-storage"
-                    persistent_volume_claim{
-                        claim_name = "elassandra-volume-claim"
                     }
                 }
             }
