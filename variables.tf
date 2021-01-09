@@ -25,6 +25,6 @@ variable elassandra_data_path{
 }
 
 variable elassandra_data_nodes{
-    type = list(string)
+    type = set(string)
 }
 
