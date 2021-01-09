@@ -431,6 +431,51 @@ resource "kubernetes_deployment" "elassandra"{
                         }
                     }
 
+                    env{
+                        name="NAMESPACE"
+                        value_from {
+                          field_ref {
+                            field_path = "metadata.namespace"
+                          }
+                        }
+                    }
+
+                    env{
+                        name="POD_NAME"
+                        value_from {
+                          field_ref{
+                              field_path = "metadata.name"
+                          }
+                        }
+                    }
+
+                    env{
+                        name="POD_IP"
+                        value_from {
+                          field_ref {
+                            field_path = "status.podIP"
+                          }
+                        }
+                    }
+
+                    env{
+                        name="MAX_HEAP_SIZE"
+                        value = "8192M"
+                    }
+
+                    # Should be 1/4 MAX_HEAP_SIZE
+                    # https://docs.wso2.com/display/MB211/Cassandra+Tuning
+                    env{
+                        name="HEAP_NEWSIZE"
+                        value = "2048M"
+                    }
+
+                    # Logging 
+                    env{
+                        name="LOGBACK_org_elassandra_discovery"
+                        value = "DEBUG"
+                    }
+
 
                     #Elassandra ports
                     port{
