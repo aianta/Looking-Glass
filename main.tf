@@ -368,17 +368,16 @@ resource "kubernetes_deployment" "elassandra"{
                 # Ensure no two pod instances are deployed on the same node
                 affinity {
                   pod_anti_affinity{
-                      required_during_scheduling_ignored_during_execution{
-                          pod_affinity_term {
-                              label_selector {
-                                  match_expressions{
-                                      key = "nims.cluster.segment"
-                                      operator = "In"
-                                      values = ["datastore"]
-                                  }
-                              }
-                          }
-                          topology_key = "kubernetes.io/hostname"
+                      required_during_scheduling_ignored_during_execution{   
+                            label_selector {
+                                match_expressions{
+                                    key = "nims.cluster.segment"
+                                    operator = "In"
+                                    values = ["datastore"]
+                                }
+                            }
+                          
+                            topology_key = "kubernetes.io/hostname"
                       }
                   }
                 }
