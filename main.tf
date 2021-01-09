@@ -341,7 +341,7 @@ resource "kubernetes_deployment" "kibana"{
 resource "kubernetes_stateful_set" "elassandra"{
     depends_on = [ kubernetes_service.elassandra_service ]
     metadata{
-        name = "elassandra-stateful-set"
+        name = "elassandra"
         labels = {
             app = "elassandra"
         }
