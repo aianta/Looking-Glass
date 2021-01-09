@@ -346,7 +346,7 @@ resource "kubernetes_deployment" "elassandra"{
         }
     }
     spec{
-        replicas = 1
+        replicas = 3
 
         selector{
             match_labels = {
@@ -364,6 +364,25 @@ resource "kubernetes_deployment" "elassandra"{
             }
 
             spec{
+
+                # Ensure no two pod instances are deployed on the same node
+                affinity {
+                  pod_anti_affinity{
+                      required_during_scheduling_ignored_during_execution{
+                          pod_affinity_term {
+                              label_selector {
+                                  match_expressions{
+                                      key = "nims.cluster.segment"
+                                      operator = "In"
+                                      values = ["datastore"]
+                                  }
+                              }
+                          }
+                          topology_key = "kubernetes.io/hostname"
+                      }
+                  }
+                }
+
                 dns_policy = "ClusterFirstWithHostNet"
                 #Elassandra container
                 container{
@@ -371,10 +390,42 @@ resource "kubernetes_deployment" "elassandra"{
                     name = "elassandra"
 
                     #Elassandra Environment variables
+                    #http://doc.elassandra.io/en/latest/installation.html#environment-variables
                     env{
                         name = "CASSANDRA_LISTEN_ADDRESS"
-                        value = "localhost"
+                        value_from {
+                          field_ref {
+                            field_path = "status.podIP"
+                          }
+                        }
                     }
+
+                    env{
+                        name="CASSANDRA_CLUSTER_NAME"
+                        value = "Elassandra-Looking-Glass"
+                    }
+
+                    env{
+                        name="CASSANDRA_SEEDS"
+                        value="elassandra-0.elassandra.default.svc.cluster.local"
+                    }
+
+                    env{
+                        #Data Center Name
+                        name="CASSANDRA_DC"
+                        value="nims-cluster"
+                    }
+
+                    env{
+                        #Rack Name should be deployed node name
+                        name="CASSANDRA_RACK"
+                        value_from {
+                          field_ref {
+                            field_path = "spec.nodename"
+                          }
+                        }
+                    }
+
 
                     #Elassandra ports
                     port{
@@ -415,6 +466,15 @@ resource "kubernetes_deployment" "elassandra"{
                         }
                         initial_delay_seconds = 15
                         timeout_seconds = 5
+                    }
+
+                    # Ensure elassandra nodes are drained when stopped
+                    lifecycle {
+                      pre_stop {
+                        exec {
+                          command = [ "/bin/sh", "-c", "nodetool drain" ]
+                        }
+                      }
                     }
 
                     volume_mount{
@@ -813,9 +873,11 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
     }
 }
 
+# Create persistent volumes in each node specified in the elassandra_data_nodes list
 resource "kubernetes_persistent_volume" "elassandra_volume"{
+    for_each = var.elassandra_data_nodes
     metadata{
-        name = "elassandra-pv"
+        name = "elassandra-pv-${each.key}"
     }
     spec{
         capacity = {
@@ -829,7 +891,7 @@ resource "kubernetes_persistent_volume" "elassandra_volume"{
                     match_expressions {
                         key = "kubernetes.io/hostname"
                         operator = "In"
-                        values = [var.elassandra_data_node]
+                        values = [each.value]
                     }
                 }
             }
@@ -843,7 +905,7 @@ resource "kubernetes_persistent_volume" "elassandra_volume"{
 }
 
 
-
+# A PVC for a elassandra node
 resource "kubernetes_persistent_volume_claim" "elassandra_pvc"{
     metadata {
         name = "elassandra-volume-claim"
@@ -856,7 +918,6 @@ resource "kubernetes_persistent_volume_claim" "elassandra_pvc"{
                 storage = var.elassandra_volume_size
             }
         }
-        volume_name = kubernetes_persistent_volume.elassandra_volume.metadata.0.name
     }
 }
 
