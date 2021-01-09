@@ -384,7 +384,7 @@ resource "kubernetes_stateful_set" "elassandra"{
                 }
 
                 init_container {
-                  name = "increase ulimit"
+                  name = "increase-ulimit"
                   image = "busybox"
                   command = [ "sh", "-c", "ulimit -l unlimited" ]
                   security_context {
