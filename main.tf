@@ -147,7 +147,7 @@ resource "kubernetes_deployment" "kafka-connect"{
             app = "kafka-connect"
         }
     }
-    depends_on = [kubernetes_deployment.kafka, kubernetes_deployment.elassandra]
+    depends_on = [kubernetes_deployment.kafka, kubernetes_stateful_set.elassandra]
     spec{
         replicas = 1
 
