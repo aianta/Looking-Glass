@@ -362,6 +362,21 @@ resource "kubernetes_stateful_set" "elassandra"{
             }
         }
 
+        volume_claim_template {
+          metadata {
+            name="elassandra-volume-claim"
+          }
+          spec {
+            access_modes = [ "ReadWriteMany" ]
+            storage_class_name = "standard"
+            resources {
+              requests = {
+                "storage" = var.elassandra_volume_size
+              }
+            }
+          }
+        }
+
         #Elassandra pod
         template{
             metadata{
@@ -988,19 +1003,4 @@ resource "kubernetes_persistent_volume" "elassandra_volume"{
 }
 
 
-# A PVC for a elassandra node
-resource "kubernetes_persistent_volume_claim" "elassandra_pvc"{
-    metadata {
-        name = "elassandra-volume-claim"
-    }
-    spec{
-        access_modes = ["ReadWriteMany"]
-        storage_class_name = "standard"
-        resources {
-            requests = {
-                storage = var.elassandra_volume_size
-            }
-        }
-    }
-}
 
