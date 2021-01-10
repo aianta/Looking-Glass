@@ -114,7 +114,8 @@ resource "kubernetes_deployment" "kafka" {
 
                     env{
                         name = "KAFKA_CFG_ADVERTISED_LISTENERS"
-                        value = "CLIENT://localhost:9092,PLAINTEXT://kafka:9093"
+                       # value = "CLIENT://localhost:9092,PLAINTEXT://kafka:9093"
+                        value = "CLIENT://os-vm230.research.cs.dal.ca:9092,PLAINTEXT://kafka:9093"
                     }
 
                     env{
