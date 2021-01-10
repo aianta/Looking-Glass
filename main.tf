@@ -924,16 +924,6 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
                 }
             }
 
-            # Kafka for external clients
-            path{
-                path = "/nims/kafka/"
-
-                backend {
-                    service_name = kubernetes_service.kafka_service.metadata.0.name
-                    service_port = 9092
-                }
-            }
-
             # Add path for elastic search once we need it available externally
             path{
                 path = "/nims/es/"
