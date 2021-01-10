@@ -742,7 +742,7 @@ resource "kubernetes_service" "kafka_service"{
         port{
             name = "kafka"
             port = 9092
-            node_port = 30701
+            # node_port = 30701
 
         }
 
@@ -758,8 +758,8 @@ resource "kubernetes_service" "kafka_service"{
             app = "kafka"
         }
         
-        type = "NodePort"
-        external_traffic_policy = "Local"
+        # type = "NodePort"
+        # external_traffic_policy = "Local"
 
     }
 }
