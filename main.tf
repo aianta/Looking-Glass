@@ -11,45 +11,6 @@
 #     cluster_ca_certificate = var.CA
 # }
 
-# # Create connectors for samples
-# module "sample-data-connector" {
-#     source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
-
-#     #Variables
-#     name = "sample"
-    
-#     depends_on = [kubernetes_deployment.kafka-connect]
-# }
-
-# # Create connectors for interlude
-# module "interlude-data-connector" {
-#     source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
-
-#     #Variables
-#     name = "interlude"
-    
-#     depends_on = [kubernetes_deployment.kafka-connect]
-# }
-
-# # Create connectors for stepping_stone
-# module "stepping-stone-data-connector" {
-#     source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
-
-#     #Variables
-#     name = "stepping-stone"
-    
-#     depends_on = [kubernetes_deployment.kafka-connect]
-# }
-
-# # Create connectors for vanguard
-# module "vanguard-data-connector" {
-#     source = "git@gitlab.com:looking-glass1/kafka-connect-module.git"
-
-#     #Variables
-#     name = "vanguard"
-    
-#     depends_on = [kubernetes_deployment.kafka-connect]
-# }
 
 # Deploy Kafka
 resource "kubernetes_deployment" "kafka" {
@@ -81,11 +42,19 @@ resource "kubernetes_deployment" "kafka" {
 
             spec{
                 dns_policy = "ClusterFirstWithHostNet"
+
                 # Kafka container
                 container{
                     image = "bitnami/kafka:2.5.0"
                     name = "kafka-server"
-                    
+
+                    resources {
+                      requests {
+                        cpu = "16" #16 cores
+                        memory = "16G" #16GB
+                      }
+                    }
+
                     # Kafka Environment variables
                     env{
                         name = "KAFKA_BROKER_ID"
@@ -173,6 +142,13 @@ resource "kubernetes_deployment" "kafka-connect"{
                 container{
                     image = "confluentinc/cp-kafka-connect:5.5.1"
                     name = "connect"
+
+                    resources {
+                      requests {
+                        cpu = "14"
+                        memory = "16G"
+                      }
+                    }
 
                     #Kafka Connect Environment variables
                     env{
@@ -309,6 +285,13 @@ resource "kubernetes_deployment" "kibana"{
                 container{
                     image = "docker.elastic.co/kibana/kibana-oss:6.8.4"
                     name="kibana"
+
+                    resources {
+                      requests {
+                        cpu="8"
+                        memory="16G"
+                      }
+                    }
 
                     env{
                         name = "ELASTICSEARCH_HOSTS"
@@ -576,6 +559,13 @@ resource "kubernetes_stateful_set" "elassandra"{
                       }
                     }
 
+                    resources {
+                      requests {
+                        cpu = "8" # 8-cores 
+                        memory = "16G" #16GB of RAM
+                      }
+                    }
+
                     volume_mount{
                         name = "elassandra-volume-claim"
                         mount_path = "/var/lib/cassandra"
@@ -619,8 +609,15 @@ resource "kubernetes_deployment" "avro-registry"{
                 container{
                     image = "confluentinc/cp-schema-registry:5.5.1"
                     name = "avro-registry"
+                    
+                    resources {
+                      requests {
+                        cpu = "6"
+                        memory = "8G"
+                      }
+                    }
 
-                     env{
+                    env{
                         name = "SCHEMA_REGISTRY_HOST_NAME"
                         value = "localhost"
                     }
@@ -678,6 +675,13 @@ resource "kubernetes_deployment" "zookeeper" {
                 container{
                     image = "bitnami/zookeeper:3.6.1"
                     name = "zookeeper-server"
+
+                    resources {
+                      requests {
+                        cpu = "6"
+                        memory = "8G"
+                      }
+                    }
 
                     env{
                         name="ZOOKEEPER_ID"
