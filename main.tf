@@ -508,6 +508,15 @@ resource "kubernetes_stateful_set" "elassandra"{
                         value = "DEBUG"
                     }
 
+                    env{
+                        name="http.cors.enabled"
+                        value="true"
+                    }
+
+                    env{
+                        name="http.cors.allow-origin"
+                        value="localhost"
+                    }
 
                     #Elassandra ports
                     port{
