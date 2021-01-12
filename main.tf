@@ -958,14 +958,14 @@ resource "kubernetes_ingress" "looking_glass_ingress"{
             }
 
             # Add path for Kafka Connect once we have API support for it in the integrationn libraries
-            path{
-                path = "/nims/kafka-connect/"
+            # path{
+            #     path = "/nims/kafka-connect/"
 
-                backend {
-                  service_name = kubernetes_service.kafka_connect_service.metadata.0.name
-                  service_port = 8082
-                }
-            }
+            #     backend {
+            #       service_name = kubernetes_service.kafka_connect_service.metadata.0.name
+            #       service_port = 8082
+            #     }
+            # }
         }
       }
 
