@@ -515,7 +515,7 @@ resource "kubernetes_stateful_set" "elassandra"{
 
                     env{
                         name="http.cors.allow-origin"
-                        value="/http?:\/\/localhost(:[0-9]+)?/"
+                        value="\/http?:\\/\\/localhost(:[0-9]+)?\/"
                     }
 
                     #Elassandra ports
