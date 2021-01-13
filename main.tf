@@ -114,10 +114,10 @@ resource "kubernetes_deployment" "kafka" {
                         value="-Xmx12g -Xms12g"
                     }
 
-                    env{
-                        name="KAFKA_CFG_NUM_PARTITIONS"
-                        value=3
-                    }
+                    # env{
+                    #     name="KAFKA_CFG_NUM_PARTITIONS"
+                    #     value=1
+                    # } This behaved wierdly
 
 
                     port{
