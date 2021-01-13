@@ -44,6 +44,7 @@ resource "kubernetes_deployment" "kafka" {
                 dns_policy = "ClusterFirstWithHostNet"
 
                 # Kafka container
+                # https://github.com/bitnami/bitnami-docker-kafka
                 container{
                     image = "bitnami/kafka:2.5.0"
                     name = "kafka-server"
@@ -96,6 +97,28 @@ resource "kubernetes_deployment" "kafka" {
                         name="KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE"
                         value="TRUE"
                     }
+
+                    # If we're gonna send massive TPG graphs over kafka we're gonna need a bigger messages
+                    env{
+                        name="KAFKA_CFG_REPLICA_FETCH_MAX_BYTES"
+                        value=31457280 #30MB
+                    }
+
+                    env{
+                        name="KAFKA_CFG_MESSAGE_MAX_BYTES"
+                        value=26214400 #25MB
+                    }
+
+                    env{
+                        name="KAFKA_HEAP_OPTS"
+                        value="-Xmx12g -Xms12g"
+                    }
+
+                    env{
+                        name="KAFKA_CFG_NUM_PARTITIONS"
+                        value=3
+                    }
+
 
                     port{
                         container_port = 9092
