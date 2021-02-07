@@ -659,6 +659,11 @@ resource "kubernetes_deployment" "avro-registry"{
                         value = "zoo1:2181"
                     }
 
+                    env{
+                        name = "SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR"
+                        value = "1"
+                    }
+
                     # Allow schema changes... this may be a mistake.
                     env{
                         name = "SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL"
