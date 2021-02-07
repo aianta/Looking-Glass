@@ -664,6 +664,11 @@ resource "kubernetes_deployment" "avro-registry"{
                         value = "1"
                     }
 
+                    env{
+                        name = "SCHEMA_REGISTRY_CLEANUP_POLICY"
+                        value = "compact"
+                    }
+
                     # Allow schema changes... this may be a mistake.
                     env{
                         name = "SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL"
