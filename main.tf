@@ -50,7 +50,7 @@ resource "kubernetes_deployment" "kafka" {
                     name = "kafka-server"
 
                     resources {
-                      requests {
+                      requests = {
                         cpu = "16" #16 cores
                         memory = "16G" #16GB
                       }
@@ -167,7 +167,7 @@ resource "kubernetes_deployment" "kafka-connect"{
                     name = "connect"
 
                     resources {
-                      requests {
+                      requests = {
                         cpu = "14"
                         memory = "16G"
                       }
@@ -310,7 +310,7 @@ resource "kubernetes_deployment" "kibana"{
                     name="kibana"
 
                     resources {
-                      requests {
+                      requests= {
                         cpu="8"
                         memory="16G"
                       }
@@ -592,7 +592,7 @@ resource "kubernetes_stateful_set" "elassandra"{
                     }
 
                     resources {
-                      requests {
+                      requests = {
                         cpu = "8" # 8-cores 
                         memory = "16G" #16GB of RAM
                       }
@@ -643,7 +643,7 @@ resource "kubernetes_deployment" "avro-registry"{
                     name = "avro-registry"
                     
                     resources {
-                      requests {
+                      requests = {
                         cpu = "6"
                         memory = "8G"
                       }
@@ -709,7 +709,7 @@ resource "kubernetes_deployment" "zookeeper" {
                     name = "zookeeper-server"
 
                     resources {
-                      requests {
+                      requests = {
                         cpu = "6"
                         memory = "8G"
                       }
